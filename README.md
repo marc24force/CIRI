@@ -35,7 +35,7 @@ Ciri extends the functionality of `INIReader` from `inih` with the following enh
 Before building, clone the repository with submodules:
 
 ```bash
-git clone --recurse-submodules <repo_url>
+git clone --recurse-submodules https://github.com/marc24force/ciri.git
 ````
 
 If you already cloned without submodules, initialize them with:
