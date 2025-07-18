@@ -72,5 +72,3 @@ make test
 Ciri builds upon the [inih](https://github.com/benhoyt/inih) library, which is licensed under the [BSD license](https://opensource.org/licenses/BSD-3-Clause).
 
 This extension is distributed under the same BSD 3-Clause license.
-
-```
