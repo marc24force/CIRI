@@ -1,5 +1,6 @@
 #include "Ciri.h"
 #include <iostream>
+#include <fstream>
 #include <regex>
 
 Ciri::Ciri(const std::string& filename, std::vector<std::string> args)
@@ -188,3 +189,49 @@ std::vector<bool> Ciri::GetBooleanList(const std::string& section, const std::st
 	return result;
 }
 
+int Ciri::Add(const std::string& section, const std::string& name, const std::string& value) {
+	std::string key = MakeKey(section, name);
+	if (_values[key].size() > 0)
+		_values[key] += "\n";
+	_values[key] += value;
+	return 0;
+}
+
+int Ciri::Remove(const std::string& section, const std::string& name) {
+	std::string key = MakeKey(section, name);
+	return !_values.erase(key);
+}
+
+int Ciri::Save(const std::string& output) {
+	std::ofstream out(output);
+	if (!out.is_open()) return 1;
+
+	std::string current = "";
+
+	// Print default section
+	for (const auto& [key, value] : _values) {
+		auto pos = key.find('=');
+		if (pos == std::string::npos) return 1; // Something bad
+		std::string section = key.substr(0,pos);
+		if (!section.empty()) continue; //Skip non default
+		std::string name = key.substr(pos+1);
+		out << name << " = " << value << "\n";
+		if (out.fail()) return 1;
+	}
+
+	// Print remainding sections
+	for (const auto& [key, value] : _values) {
+		auto pos = key.find('=');
+		if (pos == std::string::npos) return 1; // Something bad
+		std::string section = key.substr(0,pos);
+		std::string name = key.substr(pos+1);
+		if (section.empty()) continue; //Skip default
+		if (section != current) {
+			out << "[" << section << "]\n";
+			current = section;
+		}
+		out << name << " = " << value << "\n";
+		if (out.fail()) return 1;
+	}
+	return 0;
+}

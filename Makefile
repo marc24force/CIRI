@@ -1,6 +1,6 @@
 # === Config ===
 CXX := g++
-CXXFLAGS := --std=c++11 -Iinclude -Iinih/cpp -Wall -Wextra -MMD -MP
+CXXFLAGS := -Os --std=c++17 -Iinclude -Iinih/cpp
 LDFLAGS := 
 
 SRC_DIR := src

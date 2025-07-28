@@ -54,6 +54,15 @@ class Ciri : public INIReader {
 		// Get a list of boolean values from INI file, returning default_value if not found or not valid (true/false, yes/no, on/off, 1/0).
 		INI_API std::vector<bool> GetBooleanList(const std::string& section, const std::string& name, const std::vector<bool>& default_value) const;
 
+		// Add a value to the map, returns 0 on success 1 on error
+		INI_API int Add(const std::string& section, const std::string& name, const std::string& value);
+
+		// Removes an entry from the map, returns 0 on success 1 on error
+		INI_API int Remove(const std::string& section, const std::string& name);
+
+		// Writes the contents to a file, overwritting if exists. Returns 0 on success 1 on error
+		INI_API int Save(const std::string& output);
+
 
 };
 
