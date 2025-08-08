@@ -12,10 +12,11 @@ Ciri extends the functionality of `INIReader` from `inih` with the following enh
 - **Argument Substitution**: Supports string substitution using:
   - `$(0)` ... `$(N)` for positional argument replacement.
   - `${section=key}` for cross-reference resolution within the INI.
-  - **Modification Methods**: Allows modifying the loaded INI and save it into a file.
+- **Modification Methods**: Allows modifying the loaded INI and save it into a file.
   - `Add`
   - `Remove`
   - `Save`
+  - `File`
 - **Trimming**:
   - Automatically trims leading/trailing spaces from list elements.
   - Removes enclosing double quotes (`"`) from list elements if both start and end quotes are present.

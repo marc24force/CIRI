@@ -9,7 +9,10 @@ class Ciri : public INIReader {
 
 	protected:
 		// Vector with the input arguments
-		std::vector<std::string> _args;
+		const std::vector<std::string> _args;
+
+		// Loaded file
+		const std::string _file;
 
 		// Returns the input string but replacing any instance of an argument $(N) with the
 		// argument in position N. If there is no argument N does nothing.
@@ -61,7 +64,10 @@ class Ciri : public INIReader {
 		INI_API int Remove(const std::string& section, const std::string& name);
 
 		// Writes the contents to a file, overwritting if exists. Returns 0 on success 1 on error
-		INI_API int Save(const std::string& output);
+		INI_API int Save(const std::string& output) const;
+
+		// Returns the loaded file
+		INI_API std::string File() const;
 
 
 };

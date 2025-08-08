@@ -4,7 +4,7 @@
 #include <regex>
 
 Ciri::Ciri(const std::string& filename, std::vector<std::string> args)
-	: INIReader(filename), _args(std::move(args)) {}
+	: INIReader(filename), _args(std::move(args)), _file(filename) {}
 
 Ciri::Ciri(const char* buffer, size_t size, std::vector<std::string> args)
 	: INIReader(buffer, size), _args(std::move(args)) {}
@@ -202,7 +202,7 @@ int Ciri::Remove(const std::string& section, const std::string& name) {
 	return !_values.erase(key);
 }
 
-int Ciri::Save(const std::string& output) {
+int Ciri::Save(const std::string& output) const{
 	std::ofstream out(output);
 	if (!out.is_open()) return 1;
 
@@ -234,4 +234,8 @@ int Ciri::Save(const std::string& output) {
 		if (out.fail()) return 1;
 	}
 	return 0;
+}
+
+std::string Ciri::File() const {
+	return _file;
 }
