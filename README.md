@@ -63,6 +63,11 @@ To build and run the included test:
 make test
 ```
 
+### BOSC
+
+Ciri is used for the project bulding tool [bosc](https://github.com/marc24force/bosc). 
+It also supports being managed by it for building other projects.
+
 ---
 
 ## Dependencies
