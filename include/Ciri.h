@@ -14,13 +14,17 @@ class Ciri : public INIReader {
 		// Loaded file
 		const std::string _file;
 
-		// Returns the input string but replacing any instance of an argument $(N) with the
+		// Returns the input string but replacing any instance of an argument $N with the
 		// argument in position N. If there is no argument N does nothing.
 		std::string replace_args(const std::string& input) const;
 
 		// Returns the input string but replacing any insatnce of a reference to another section-key
 		// pair ${section=key} with the value of said key. If there is no key does nothing.
 		std::string replace_refs(const std::string& input) const;
+
+		// Returns the input string but replacing any insatnce of a command to the output of said command.
+		// If error, returns the error message.
+		std::string replace_cmds(const std::string& input) const;
 
 	public:
 		// Constructs Ciri and parse given filename, set the Ciri arguments to args

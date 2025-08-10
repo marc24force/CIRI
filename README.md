@@ -10,7 +10,8 @@ It is a lightweight C++ wrapper around [inih](https://github.com/benhoyt/inih), 
 Ciri extends the functionality of `INIReader` from `inih` with the following enhancements:
 
 - **Argument Substitution**: Supports string substitution using:
-  - `$(0)` ... `$(N)` for positional argument replacement.
+  - `$0` ... `$N` for positional argument replacement.
+  - `$(cmd)` for reading the output of a shell command.
   - `${section=key}` for cross-reference resolution within the INI.
 - **Modification Methods**: Allows modifying the loaded INI and save it into a file.
   - `Add`

@@ -1,5 +1,7 @@
 #include "Ciri.h"
+#include <filesystem>
 #include <iostream>
+#include <array>
 #include <fstream>
 #include <regex>
 
@@ -25,7 +27,7 @@ Ciri::Ciri(const char* buffer, size_t size, std::vector<std::string> args)
 	}
 
 std::string Ciri::replace_args(const std::string& input) const {
-	std::regex pattern(R"(\$\((\d+)\))");
+	std::regex pattern(R"(\$(\d+))");
 	std::smatch match;
 	std::string result;
 	auto it = input.cbegin();
@@ -58,10 +60,46 @@ std::string Ciri::replace_refs(const std::string& input) const {
 	return result;
 }
 
+std::string Ciri::replace_cmds(const std::string& input) const {
+    std::regex pattern(R"(\$\((.*?)\))");
+    std::smatch match;
+    std::string result;
+    auto it = input.cbegin();
+
+    auto exec = [&](const std::string& cmd) -> std::string {
+        std::array<char, 128> buffer;
+        std::string output;
+        std::filesystem::path file_path(_file);
+        std::filesystem::path dir = file_path.parent_path();
+        std::string full_cmd = "cd " + dir.string() + " && " + cmd;
+        FILE* pipe = popen(full_cmd.c_str(), "r");
+        if (!pipe) return "";
+        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+            output += buffer.data();
+        }
+        pclose(pipe);
+        if (!output.empty() && output.back() == '\n') output.pop_back();
+        return output;
+    };
+
+    while (std::regex_search(it, input.cend(), match, pattern)) {
+        result.append(it, match[0].first);
+        std::string cmd_output = exec(match[1].str());
+        result.append(cmd_output);
+        it = match[0].second;
+    }
+    result.append(it, input.cend());
+    return result;
+}
+
+
+
+
 std::string Ciri::Get(const std::string& section, const std::string& name, const std::string& default_value) const {
 	std::string val = INIReader::Get(section, name, default_value);
 	val = replace_refs(val);
 	val = replace_args(val);
+	val = replace_cmds(val);
 	return trim(val);
 }
 
