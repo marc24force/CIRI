@@ -34,7 +34,7 @@ class Ciri : public INIReader {
 		INI_API explicit Ciri(const char* buffer, size_t size, std::vector<std::string> args = {});
 
 		// Get a string value from an INI file, performing argument and reference replacements.
-		INI_API std::string Get(const std::string& section, const std::string& name, const std::string& default_value = "") const;
+		INI_API std::string Get(const std::string& section, const std::string& name, const std::string& default_value = "") const override;
 
 		// Get a vector of the values in an INI file, if the value is not a list return the default value.
 		// Supports a normal list {1,2,4} or a repetition list (2,10) -> {10,10}

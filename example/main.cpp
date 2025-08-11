@@ -22,7 +22,7 @@ int main() {
 	Ciri ciri("example/test.ini", args);
 
 	// Test simple Get with substitution
-	std::cout << "\n" << ciri.Get("example", "text", "default") << "\n";
+	std::cout << "\n" << ciri.GetString("example", "text", "default") << "\n";
 
 	// Test GetList with normal list
 	auto list1 = ciri.GetList("lists", "buy", {});

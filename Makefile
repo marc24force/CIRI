@@ -38,6 +38,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 $(BUILD_DIR)/INIReader.o: $(INIH_CPP)/INIReader.cpp
 	@mkdir -p $(BUILD_DIR)
+	sed -i 's/\(INI_API\) \(std::string Get(\)/\1 virtual \2/' inih/cpp/INIReader.h
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 $(BUILD_DIR)/ini.o: $(INIH_DIR)/ini.c
@@ -45,7 +46,7 @@ $(BUILD_DIR)/ini.o: $(INIH_DIR)/ini.c
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 # Test rule
-test: build
+test: build $(TEST_SRC)
 	$(CXX) $(CXXFLAGS) $(TEST_SRC) -o $(TEST_BIN) $(TARGET)
 	./$(TEST_BIN)
 
