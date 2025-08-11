@@ -9,9 +9,9 @@ INIH_DIR := inih
 INIH_CPP := $(INIH_DIR)/cpp
 INIH_SRC := $(INIH_CPP)/INIReader.cpp $(INIH_DIR)/ini.c
 
-OBJS := $(BUILD_DIR)/Ciri.o \
+OBJS := $(BUILD_DIR)/ini.o \
         $(BUILD_DIR)/INIReader.o \
-        $(BUILD_DIR)/ini.o
+	$(BUILD_DIR)/Ciri.o
 
 DEPS := $(OBJS:.o=.d)
 
