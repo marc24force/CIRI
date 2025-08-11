@@ -15,13 +15,8 @@ int main() {
 	}
 
 
-	const char* user = std::getenv("USER"); // On Unix-like systems
-	if (!user) user = std::getenv("USERNAME"); // On Windows
-						   
 	std::vector<std::string> args;
 
-
-	args.emplace_back(user);
 	args.emplace_back(std::to_string(oranges));
 
 	Ciri ciri("example/test.ini", args);

@@ -45,51 +45,65 @@ std::string Ciri::replace_args(const std::string& input) const {
 }
 
 std::string Ciri::replace_refs(const std::string& input) const {
-	std::regex pattern(R"(\$\{([^=]+)=([^}]+)\})");
+	std::regex pattern(R"(\$\{([^}]+)\})");
 	std::smatch match;
 	std::string result;
 	std::string invalid = "__ciri_invalid_string123122__INVALID_";
 	auto it = input.cbegin();
+
 	while (std::regex_search(it, input.cend(), match, pattern)) {
 		result.append(it, match[0].first);
-		std::string ref = INIReader::Get(match[1].str(), match[2].str(), invalid);
-		result.append(ref == invalid ? match[0].str() : ref);
+
+		std::string content = match[1].str();
+		auto equal_pos = content.find('=');
+
+		if (equal_pos == std::string::npos)
+			result.append(std::getenv(content.c_str()) ? std::getenv(content.c_str()) : match[0].str());
+		else {
+			std::string section = content.substr(0, equal_pos);
+			std::string key = content.substr(equal_pos + 1);
+			std::string ref = INIReader::Get(section, key, invalid);
+			result.append(ref == invalid ? match[0].str() : ref);
+		}
+
 		it = match[0].second;
 	}
+
 	result.append(it, input.cend());
 	return result;
 }
 
+
 std::string Ciri::replace_cmds(const std::string& input) const {
-    std::regex pattern(R"(\$\((.*?)\))");
-    std::smatch match;
-    std::string result;
-    auto it = input.cbegin();
+	std::regex pattern(R"(\$\((.*?)\))");
+	std::smatch match;
+	std::string result;
+	auto it = input.cbegin();
 
-    auto exec = [&](const std::string& cmd) -> std::string {
-        std::array<char, 128> buffer;
-        std::string output;
-        std::filesystem::path file_path(_file);
-        std::filesystem::path dir = file_path.parent_path();
-        std::string full_cmd = "cd " + dir.string() + " && " + cmd;
-        FILE* pipe = popen(full_cmd.c_str(), "r");
-        if (!pipe) return "";
-        while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
-            output += buffer.data();
-        }
-        pclose(pipe);
-        if (!output.empty() && output.back() == '\n') output.pop_back();
-        return output;
-    };
+	auto exec = [&](const std::string& cmd) -> std::string {
+		std::array<char, 128> buffer;
+		std::string output;
+		std::filesystem::path file_path(_file);
+		std::filesystem::path dir = file_path.parent_path();
+		std::string full_cmd = "cd " + dir.string() + " && " + cmd;
+		FILE* pipe = popen(full_cmd.c_str(), "r");
+		if (!pipe) return "";
+		while (fgets(buffer.data(), buffer.size(), pipe) != nullptr) {
+			output += buffer.data();
+		}
+		pclose(pipe);
+		if (!output.empty() && output.back() == '\n') output.pop_back();
+		return output;
+	};
 
-    while (std::regex_search(it, input.cend(), match, pattern)) {
-        result.append(it, match[0].first);
-        std::string cmd_output = exec(match[1].str());
-        result.append(cmd_output);
-        it = match[0].second;
-    }
-    result.append(it, input.cend());
-    return result;
+	while (std::regex_search(it, input.cend(), match, pattern)) {
+		result.append(it, match[0].first);
+		std::string cmd_output = exec(match[1].str());
+		result.append(cmd_output);
+		it = match[0].second;
+	}
+	result.append(it, input.cend());
+	return result;
 }
 
 
