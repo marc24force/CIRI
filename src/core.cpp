@@ -60,7 +60,7 @@ void Ciri::remove(const std::string& section, const std::string& key) {
 	if (sec_it != _data.end()) {
 		sec_it->second.erase(key);
 		if (sec_it->second.empty())
-			_data.erase(sec_it); // remove section if empty
+			_data.erase(sec_it);
 	}
 }
 
@@ -75,31 +75,6 @@ std::string Ciri::_get(const std::string& section, const std::string& key) const
 	value = _replace_cmds(value);
 	return value;
 }
-
-//	size_t pos = 0;
-//	while ((pos = value.find("}{", pos)) != std::string::npos) {
-//		value.replace(pos, 2, "},{");
-//		pos += 2;
-//	}
-//
-//	// Normal list case
-//	size_t start = 0;
-//	while (true) {
-//		size_t pos = value.find(',', start);
-//		std::string token = (pos == std::string::npos) ? value.substr(start) : value.substr(start, pos - start);
-//
-//		token.erase(0, token.find_first_not_of(" \"\t{"));
-//		token.erase(token.find_last_not_of(" \"\t}") + 1);
-//
-//		if (!token.empty()) result.push_back(token);
-//
-//		if (pos == std::string::npos) break;
-//		start = pos + 1;
-//	}
-//
-//	return result;
-
-
 
 std::vector<std::string> flatten_list(const std::string &s) {
 	std::vector<std::string> result;
@@ -130,17 +105,13 @@ std::vector<std::string> flatten_list(const std::string &s) {
 	return result;
 }
 
-
-
 std::vector<std::string> Ciri::_getList(const std::string& section, const std::string& key) const {
 	if (!exists(section, key)) return {};
 	std::string value = _get(section, key);
 
-	// 1️⃣ Expand (N,e) patterns
 	std::smatch match;
 	std::regex repeat_pattern(R"(\(\s*(\d+)\s*,\s*([^\)]+)\s*\))");
 
-	// keep replacing until no more matches
 	while (std::regex_search(value, match, repeat_pattern)) {
 		int count = std::stoi(match[1].str());
 		std::string element = match[2].str();
