@@ -1,58 +1,67 @@
-# === Config ===
-CXX := g++
-CXXFLAGS := -Os --std=c++17 -Iinclude -Iinih/cpp
-LDFLAGS := 
+CXX = g++
+CXXFLAGS = -std=c++17 -Wall -Wextra -O3 -ffunction-sections -fdata-sections -Iinclude -Isrc/include
+LDFLAGS = -Wl,--gc-sections
+AR = ar
+ARFLAGS = rcs
 
-SRC_DIR := src
-BUILD_DIR := build
-INIH_DIR := inih
-INIH_CPP := $(INIH_DIR)/cpp
-INIH_SRC := $(INIH_CPP)/INIReader.cpp $(INIH_DIR)/ini.c
+SRC = src/core.cpp src/type_getters.cpp src/parser.cpp src/replace.cpp
+OBJ = $(SRC:.cpp=.o)
+LIB = libciri.a
+TARGET = example/test_ciri
+MAIN = example/main.cpp
 
-OBJS := $(BUILD_DIR)/ini.o \
-        $(BUILD_DIR)/INIReader.o \
-	$(BUILD_DIR)/Ciri.o
+ifeq ($(OS),Windows_NT)
+	EXE_EXT = .exe
+	RM = del /Q
+else
+	EXE_EXT =
+	RM = rm -f
+endif
 
-DEPS := $(OBJS:.o=.d)
+STATE_FILE = .namespace
+.DELETE_ON_ERROR:
 
-TARGET := $(BUILD_DIR)/libciri.a
+define PRINT_NS
+	@if [ ! -f $(STATE_FILE) ] || [ "$$(cat $(STATE_FILE))" != "$(1)" ]; then \
+		echo "[$(1)]"; \
+		echo "$(1)" > $(STATE_FILE); \
+	fi
+endef
 
-TEST_SRC := example/main.cpp
-TEST_BIN := $(BUILD_DIR)/ciri_test
+# Ensure cleanup after make finishes
+MAKE_TERM_OUT := $(shell trap 'rm -f $(STATE_FILE)' EXIT)
 
-# === Rules ===
-.PHONY: all build test clean
+all: $(LIB)
 
-all: build
+$(LIB): $(OBJ)
+	$(call PRINT_NS,Makefile)
+	@echo " - Packing libciri"
+	@$(AR) $(ARFLAGS) $@ $(OBJ)
 
-build: $(TARGET)
+src/%.o: src/%.cpp
+	$(call PRINT_NS,Makefile)
+	@echo " - Building $*"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
-$(TARGET): $(OBJS)
-	@mkdir -p $(BUILD_DIR)
-	ar rcs $@ $^
+TARGET_EXE = $(TARGET)$(EXE_EXT)
+MAIN_OBJ = example/main.o
 
-# Compile rules with separate object files in build/
-$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+test: $(TARGET_EXE)
+	$(call PRINT_NS,test_ciri)
+	@./$(TARGET_EXE)
 
-$(BUILD_DIR)/INIReader.o: $(INIH_CPP)/INIReader.cpp
-	@mkdir -p $(BUILD_DIR)
-	sed -i 's/\(INI_API\) \(std::string Get(\)/\1 virtual \2/' inih/cpp/INIReader.h
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(TARGET_EXE): $(LIB) $(MAIN_OBJ)
+	$(call PRINT_NS,Makefile)
+	@echo " - Linking test_ciri"
+	@$(CXX) $(CXXFLAGS) $(LDFLAGS) $(MAIN_OBJ) $(LIB) -o $(TARGET_EXE)
 
-$(BUILD_DIR)/ini.o: $(INIH_DIR)/ini.c
-	@mkdir -p $(BUILD_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+$(MAIN_OBJ): $(MAIN)
+	$(call PRINT_NS,Makefile)
+	@echo " - Building main"
+	@$(CXX) $(CXXFLAGS) -c $(MAIN) -o $(MAIN_OBJ)
 
-# Test rule
-test: build $(TEST_SRC)
-	$(CXX) $(CXXFLAGS) $(TEST_SRC) -o $(TEST_BIN) $(TARGET)
-	./$(TEST_BIN)
-
-# Clean rule
 clean:
-	rm -rf $(BUILD_DIR)
-
--include $(DEPS)
+	$(call PRINT_NS,Makefile)
+	@echo " - Cleaning files"
+	@$(RM) $(OBJ) $(LIB) example/main.o $(TARGET)$(EXE_EXT) $(STATE_FILE)
 

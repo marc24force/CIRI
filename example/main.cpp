@@ -1,40 +1,54 @@
 #include <iostream>
+#include <filesystem>
+#include <algorithm>
+#include <cctype>   // for ::isdigit
 #include <vector>
-#include <string>
-#include <cstdlib>
-#include "Ciri.h"
+
+#include "ciri.h"
+
+namespace fs = std::filesystem;
 
 int main() {
-	std::cout << "Input a number (0 - 255): ";
-	int oranges;
-	std::cin >> oranges;
+	std::vector<std::string> args;
+	std::string input;
 
-	if (oranges > 255 || oranges < 0) {
-		std::cout << "Invalid value, now you have 3\n";
-		oranges = 3;
+
+	std::cout << "Enter redundancy (0-10): ";
+	std::getline(std::cin, input);
+
+	// check if input is a number between 0 and 10
+	if (!input.empty() && std::all_of(input.begin(), input.end(), ::isdigit)) {
+		int value = std::stoi(input);
+		if (value >= 0) args.push_back(value < 10 ? input : "10");
 	}
 
+	Ciri ciri(fs::path("example/test.ini"), args);
 
-	std::vector<std::string> args;
+	// User
+	std::cout << "User: " << ciri.getString("database", "user") << "\n";
+	// Test existing lists
+	auto hosts = ciri.getStringList("server", "hosts");
+	std::cout << "Server hosts:\n";
+	for (auto& h : hosts) std::cout << "- " << h << "\n";
 
-	args.emplace_back(std::to_string(oranges));
+	auto modes = ciri.getStringList("server", "modes");
+	std::cout << "Server modes:\n";
+	for (auto& m : modes) std::cout << "- " << m << "\n";
 
-	Ciri ciri("example/test.ini", args);
+	auto replicas = ciri.getStringList("database", "replicas");
+	std::cout << "Database replicas: (";
+	for (size_t i = 0; i < replicas.size(); ++i) {
+		if (i > 0) std::cout << ", ";
+		std::cout << replicas[i];
+	}
+	std::cout << ")\n";
 
-	// Test simple Get with substitution
-	std::cout << "\n" << ciri.GetString("example", "text", "default") << "\n";
-
-	// Test GetList with normal list
-	auto list1 = ciri.GetList("lists", "buy", {});
-	std::cout << "To buy: ";
-	for (const auto& s : list1) std::cout << s << " ";
-	std::cout << "\n";
-
-	// Test GetList with repetition list
-	auto list2 = ciri.GetList("lists", "owned", {"default"});
-	std::cout << "Owned: ";
-	for (const auto& s : list2) std::cout << s << " ";
-	std::cout << "\n";
+	// Add a new list
+	ciri.add("server", "new_list", "alpha");
+	ciri.add("server", "new_list", "{beta}");
+	auto new_list = ciri.getStringList("server", "new_list");
+	std::cout << "New list:\n";
+	for (auto& n : new_list) std::cout << "- " << n << "\n";
 
 	return 0;
 }

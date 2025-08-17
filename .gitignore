@@ -1,1 +1,3 @@
-build/
+*.o
+*.a
+test_ciri
