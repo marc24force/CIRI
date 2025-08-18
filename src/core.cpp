@@ -19,6 +19,10 @@ std::filesystem::path Ciri::directory() {
 	return _dir;
 }
 
+void Ciri::save(const std::string& filename) const {
+	save_ini(_data, _dir / filename);
+}
+
 void Ciri::save(const std::filesystem::path& file_path) const {
 	save_ini(_data, file_path);
 }

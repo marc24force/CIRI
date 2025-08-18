@@ -69,6 +69,7 @@ void remove(const std::string& section, const std::string& key);
 ### Save
 
 ```cpp
+void save(const std::string& filename) const;
 void save(const std::filesystem::path& file_path) const;
 ```
 
