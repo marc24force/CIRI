@@ -69,10 +69,10 @@ std::string Ciri::_get(const std::string& section, const std::string& key) const
 	auto sec_it = _data.find(section);
 	auto key_it = sec_it->second.find(key);
 	std::string value = key_it->second;
-	value = _replace_refs(value);
 	value = _replace_envs(value);
 	value = _replace_args(value);
 	value = _replace_cmds(value);
+	value = _replace_refs(value);
 	return value;
 }
 
