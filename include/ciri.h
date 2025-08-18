@@ -53,6 +53,9 @@ class Ciri {
 		std::filesystem::path directory();
 
 		// Stores the current configuration to a file
+		void save(const std::string& filename) const;
+
+		// Stores the current configuration to a file
 		void save(const std::filesystem::path& file_path) const;
 
 		// Adds or updates a key in a section
